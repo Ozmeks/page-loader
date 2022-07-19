@@ -1,0 +1,26 @@
+{
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "description": "CLI application that downloads pages from the Internet.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ozmeks/backend-project-lvl3.git"
+  },
+  "author": "ozmeks",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ozmeks/backend-project-lvl3/issues"
+  },
+  "homepage": "https://github.com/Ozmeks/backend-project-lvl3#readme",
+  "devDependencies": {
+    "eslint": "^8.20.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "jest": "^28.1.3"
+  }
+}
