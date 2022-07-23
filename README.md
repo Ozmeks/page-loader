@@ -11,3 +11,30 @@ CLI application that downloads pages from the Internet.
 ```sh
 $ make install
 ```
+
+### How to use:
+You can use the utility as a console application or as a as a library in your JavaScript project.
+
+In terminal:
+
+```
+$ pageloader -h
+Usage: pageloader [options] <url>
+
+CLI application that downloads pages from the Internet.
+
+Options:
+  -V, --version       output the version number
+  -o, --output [dir]  output dir (default: "/home/user/current-dir")
+  -h, --help          display help for command
+```
+
+In project:
+
+```
+import pageLoader from 'pageloader';
+pageLoader(url, filePath);
+```
+
+#### Simple page loading example:
+[![asciicast](https://asciinema.org/a/510383.svg)](https://asciinema.org/a/510383)
