@@ -12,21 +12,26 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const getFixturePath = (filename) => join(__dirname, '..', '__fixtures__', filename);
 const pageBefore = await readFile(getFixturePath('page-before.html'), 'utf-8');
-const imgNode = await readFile(getFixturePath('files/nodejs.png'), 'utf-8');
-const imgLogo = await readFile(getFixturePath('files/logo.svg'), 'utf-8');
+const imgSrc = await readFile(getFixturePath('files/nodejs.png'), 'utf-8');
+const scriptSrc = await readFile(getFixturePath('files/script.js'), 'utf-8');
+const cssSrc = await readFile(getFixturePath('files/app.css'), 'utf-8');
 const pageAfter = await readFile(getFixturePath('page-after.html'), 'utf-8');
 
 beforeAll(async () => {
   nock.disableNetConnect();
   nock('https://ru.hexlet.io')
+    .persist()
     .get('/courses')
     .reply(200, pageBefore);
   nock('https://ru.hexlet.io')
     .get('/assets/professions/nodejs.png')
-    .reply(200, imgNode);
-  nock('https://cdn2.hexlet.io')
-    .get('/assets/logo_ru-495f05850e0095ea722a2b583565d492719579c02b0ce61d924e4f895fabf781.svg')
-    .reply(200, imgLogo);
+    .reply(200, imgSrc);
+  nock('https://ru.hexlet.io')
+    .get('/packs/js/runtime.js')
+    .reply(200, scriptSrc);
+  nock('https://ru.hexlet.io')
+    .get('/assets/application.css')
+    .reply(200, cssSrc);
 });
 
 let tempPath = '';

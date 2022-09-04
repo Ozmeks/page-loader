@@ -9,17 +9,20 @@ const makeName = (name) => name.replaceAll(/[^A-Za-z0-9]/g, '-');
 
 const makeFileName = (pathname) => {
   const { dir, name, ext } = parse(pathname);
-  const path = makeName(resolve(dir, name));
-  return `${path}${ext}`;
+  const path = makeName(join(dir, name));
+  const fileExt = (ext === '') ? '.html' : ext;
+  return `${path}${fileExt}`;
 };
 
 const downloadPage = (inputUrl, inputPath = 'default') => {
   const outputPath = (inputPath === 'default') ? process.cwd() : inputPath;
   const { host: inputHost, pathname: inputPathName } = new URL(inputUrl);
-  const pageName = makeName(`${inputHost}${inputPathName}`);
+  const mainName = join(inputHost, inputPathName);
+  const pageName = makeFileName(mainName);
   const prefixFileName = makeName(inputHost);
-  const dirName = `${pageName}_files`;
-  const outputFilePath = resolve(outputPath, `${pageName}.html`);
+  const dirName = `${makeName(mainName)}_files`;
+
+  const outputFilePath = resolve(outputPath, pageName);
   const filesPath = resolve(outputPath, dirName);
 
   let $;
@@ -27,13 +30,21 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
   const promise = axios.get(inputUrl)
     .then(({ data }) => {
       $ = load(data);
-      $('img').each((i, el) => {
-        const src = $(el).attr('src');
-        const { href, pathname } = new URL(src, inputUrl);
-        const fileName = `${prefixFileName}${makeFileName(pathname)}`;
-        const path = resolve(filesPath, fileName);
-        promises.push({ url: href, path });
-        $(el).attr('src', join(dirName, fileName));
+      $('img, script, link').each((i, el) => {
+        const src = ($(el).prop('tagName') === 'LINK') ? $(el).attr('href') : $(el).attr('src');
+        const { href, pathname, host } = new URL(src, inputUrl);
+        if (host === inputHost) {
+          const fileName = makeFileName(`${prefixFileName}${pathname}`);
+          const path = resolve(filesPath, fileName);
+          promises.push({ url: href, path });
+
+          const localLink = join(dirName, fileName);
+          if ($(el).prop('tagName') === 'LINK') {
+            $(el).attr('href', localLink);
+          } else {
+            $(el).attr('src', localLink);
+          }
+        }
       });
       return (promises.length > 0) ? fsp.mkdir(filesPath) : null;
     })
