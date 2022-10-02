@@ -36,5 +36,8 @@ import pageLoader from 'pageloader';
 pageLoader(url, filePath);
 ```
 
-#### Simple page loading example:
+#### Page loading example:
 [![asciicast](https://asciinema.org/a/510383.svg)](https://asciinema.org/a/510383)
+
+#### Debug mode example:
+[![asciicast](https://asciinema.org/a/525137.svg)](https://asciinema.org/a/525137)

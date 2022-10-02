@@ -1,9 +1,11 @@
+import 'axios-debug-log';
 import axios from 'axios';
 import fsp from 'fs/promises';
 import { createWriteStream } from 'fs';
 import { resolve, parse, join } from 'path';
 import { load } from 'cheerio';
 import { format } from 'prettier';
+import debug from 'debug';
 
 const makeName = (name) => name.replaceAll(/[^A-Za-z0-9]/g, '-');
 
@@ -14,7 +16,12 @@ const makeFileName = (pathname) => {
   return `${path}${fileExt}`;
 };
 
+const log = debug('page-loader');
+const logHttp = debug('page-loader: http');
+
 const downloadPage = (inputUrl, inputPath = 'default') => {
+  log('start logging');
+
   const outputPath = (inputPath === 'default') ? process.cwd() : inputPath;
   const { host: inputHost, pathname: inputPathName } = new URL(inputUrl);
   const mainName = join(inputHost, inputPathName);
@@ -24,11 +31,14 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
 
   const outputFilePath = resolve(outputPath, pageName);
   const filesPath = resolve(outputPath, dirName);
+  log(`File path: ${outputFilePath}`);
 
   let $;
   const promises = [];
   const promise = axios.get(inputUrl)
     .then(({ data }) => {
+      logHttp(`Received html by url: ${inputUrl}`);
+
       $ = load(data);
       $('img, script, link').each((i, el) => {
         const src = ($(el).prop('tagName') === 'LINK') ? $(el).attr('href') : $(el).attr('src');
@@ -39,6 +49,7 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
           promises.push({ url: href, path });
 
           const localLink = join(dirName, fileName);
+          log(`Created local link: ${localLink}`);
           if ($(el).prop('tagName') === 'LINK') {
             $(el).attr('href', localLink);
           } else {
@@ -49,7 +60,9 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
       return (promises.length > 0) ? fsp.mkdir(filesPath) : null;
     })
     .then(() => {
-      if (promises.length > 0) {
+      const sourceCount = promises.length;
+      if (sourceCount > 0) {
+        logHttp(`Started downloading ${sourceCount} html sources to: ${filesPath}`);
         promises.map(({ url, path }) => axios
           .get(url, { responseType: 'stream' })
           .then(({ data }) => data.pipe(createWriteStream(path))));
@@ -58,10 +71,14 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
       return null;
     })
     .then(() => {
+      logHttp('Finished downloading html sources');
       const outputHtml = format($.html(), { parser: 'html' });
       return fsp.writeFile(outputFilePath, outputHtml);
     })
-    .then(() => outputFilePath);
+    .then(() => {
+      log(`Saved html to ${outputFilePath}`);
+      return outputFilePath;
+    });
 
   return promise;
 };
