@@ -23,6 +23,8 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
   log('start logging');
 
   const outputPath = (inputPath === 'default') ? process.cwd() : inputPath;
+  log(`Output path: ${outputPath}`);
+
   const { host: inputHost, pathname: inputPathName } = new URL(inputUrl);
   const mainName = join(inputHost, inputPathName);
   const pageName = makeFileName(mainName);
@@ -30,8 +32,8 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
   const dirName = `${makeName(mainName)}_files`;
 
   const outputFilePath = resolve(outputPath, pageName);
-  const filesPath = resolve(outputPath, dirName);
   log(`File path: ${outputFilePath}`);
+  const filesPath = resolve(outputPath, dirName);
 
   let $;
   const promises = [];
@@ -78,6 +80,10 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
     .then(() => {
       log(`Saved html to ${outputFilePath}`);
       return outputFilePath;
+    })
+    .catch((e) => {
+      log(e);
+      throw e;
     });
 
   return promise;

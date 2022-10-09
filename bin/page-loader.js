@@ -11,6 +11,11 @@ program
   .arguments('<url>')
   .action((url) => {
     const { output } = program.opts();
-    downloadPage(url, output).then(console.log);
+    downloadPage(url, output)
+      .then(console.log)
+      .catch((e) => {
+        console.error(e.message);
+        process.exit(e.code);
+      });
   })
   .parse(process.argv);

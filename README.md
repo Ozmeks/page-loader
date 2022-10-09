@@ -41,3 +41,6 @@ pageLoader(url, filePath);
 
 #### Debug mode example:
 [![asciicast](https://asciinema.org/a/525137.svg)](https://asciinema.org/a/525137)
+
+#### Exmple with wrong arguments:
+[![asciicast](https://asciinema.org/a/526890.svg)](https://asciinema.org/a/526890)
