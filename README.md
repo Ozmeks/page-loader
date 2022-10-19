@@ -5,7 +5,7 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c20ce0b3299232e264b6/test_coverage)](https://codeclimate.com/github/Ozmeks/backend-project-lvl3/test_coverage)
 
 # Annotation
-CLI application that downloads pages from the Internet.
+CLI application that downloads HTML pages with local sources from the Internet.
 
 ### How to install:
 ```sh
@@ -37,10 +37,10 @@ pageLoader(url, filePath);
 ```
 
 #### Page loading example:
-[![asciicast](https://asciinema.org/a/510383.svg)](https://asciinema.org/a/510383)
+[![asciicast](https://asciinema.org/a/530213.svg)](https://asciinema.org/a/530213)
 
 #### Debug mode example:
-[![asciicast](https://asciinema.org/a/525137.svg)](https://asciinema.org/a/525137)
+[![asciicast](https://asciinema.org/a/530217.svg)](https://asciinema.org/a/530217)
 
 #### Exmple with wrong arguments:
 [![asciicast](https://asciinema.org/a/526890.svg)](https://asciinema.org/a/526890)

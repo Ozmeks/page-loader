@@ -6,6 +6,7 @@ import { resolve, parse, join } from 'path';
 import { load } from 'cheerio';
 import { format } from 'prettier';
 import debug from 'debug';
+import Listr from 'listr';
 
 const makeName = (name) => name.replaceAll(/[^A-Za-z0-9]/g, '-');
 
@@ -26,7 +27,8 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
   log(`Output path: ${outputPath}`);
 
   const { host: inputHost, pathname: inputPathName } = new URL(inputUrl);
-  const mainName = join(inputHost, inputPathName);
+  const inputPathNameSlash = (inputPathName === '/') ? '' : inputPathName;
+  const mainName = join(inputHost, inputPathNameSlash);
   const pageName = makeFileName(mainName);
   const prefixFileName = makeName(inputHost);
   const dirName = `${makeName(mainName)}_files`;
@@ -40,22 +42,25 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
   const promise = axios.get(inputUrl)
     .then(({ data }) => {
       logHttp(`Received html by url: ${inputUrl}`);
-
       $ = load(data);
-      $('img, script, link').each((i, el) => {
-        const src = ($(el).prop('tagName') === 'LINK') ? $(el).attr('href') : $(el).attr('src');
-        const { href, pathname, host } = new URL(src, inputUrl);
-        if (host === inputHost) {
-          const fileName = makeFileName(`${prefixFileName}${pathname}`);
-          const path = resolve(filesPath, fileName);
-          promises.push({ url: href, path });
 
-          const localLink = join(dirName, fileName);
-          log(`Created local link: ${localLink}`);
-          if ($(el).prop('tagName') === 'LINK') {
-            $(el).attr('href', localLink);
-          } else {
-            $(el).attr('src', localLink);
+      $('script, img, link').each((i, el) => {
+        const src = ($(el).prop('tagName') === 'LINK') ? $(el).attr('href') : $(el).attr('src');
+        if (typeof src !== 'undefined' && src !== false) {
+          const { href, pathname, host } = new URL(src, inputUrl);
+          const isLocal = (host === inputHost);
+          if (isLocal) {
+            const fileName = makeFileName(`${prefixFileName}${pathname}`);
+            const path = resolve(filesPath, fileName);
+            promises.push({ url: href, path });
+
+            const localLink = join(dirName, fileName);
+            log(`Created local link: ${localLink}`);
+            if ($(el).prop('tagName') === 'LINK') {
+              $(el).attr('href', localLink);
+            } else {
+              $(el).attr('src', localLink);
+            }
           }
         }
       });
@@ -63,19 +68,44 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
     })
     .then(() => {
       const sourceCount = promises.length;
-      if (sourceCount > 0) {
-        logHttp(`Started downloading ${sourceCount} html sources to: ${filesPath}`);
-        promises.map(({ url, path }) => axios
-          .get(url, { responseType: 'stream' })
-          .then(({ data }) => data.pipe(createWriteStream(path))));
-        return Promise.all(promises);
+      if (sourceCount === 0) {
+        return null;
       }
-      return null;
+
+      logHttp(`Started downloading ${sourceCount} html sources to: ${filesPath}`);
+      const tasks = promises.map(({ url, path }) => ({
+        title: `Download source ${url}`,
+        task: () => axios
+          .get(url, { responseType: 'stream' })
+          .then(({ data }) => {
+            data.pipe(createWriteStream(path));
+            return new Promise((resolvePromise, rejectPromise) => {
+              data.on('end', () => {
+                logHttp(`Downloaded source ${url}`);
+                resolvePromise();
+              });
+
+              data.on('error', (err) => {
+                logHttp(`Error downloading source ${url}: ${err}`);
+                rejectPromise(err);
+              });
+            });
+          }),
+      }));
+
+      return new Listr(tasks, { concurrent: true, exitOnError: false })
+        .run();
     })
     .then(() => {
       logHttp('Finished downloading html sources');
       const outputHtml = format($.html(), { parser: 'html' });
-      return fsp.writeFile(outputFilePath, outputHtml);
+      const task = new Listr([
+        {
+          title: `Saved html page ${inputUrl}`,
+          task: () => fsp.writeFile(outputFilePath, outputHtml),
+        },
+      ]);
+      return task.run();
     })
     .then(() => {
       log(`Saved html to ${outputFilePath}`);
