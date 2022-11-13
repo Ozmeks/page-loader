@@ -14,7 +14,7 @@ program
     downloadPage(url, output)
       .then(console.log)
       .catch((e) => {
-        console.error(e.toString());
+        console.error(e.message);
         process.exit(e.code);
       });
   })
