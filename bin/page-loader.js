@@ -15,7 +15,7 @@ program
       .then(console.log)
       .catch((e) => {
         console.error(e.message);
-        process.exit(e.code);
+        process.exit(1);
       });
   })
   .parse(process.argv);
