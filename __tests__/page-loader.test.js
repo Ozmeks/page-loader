@@ -11,11 +11,6 @@ import downloadPage from '../src/index.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const getFixturePath = (filename) => join(__dirname, '..', '__fixtures__', filename);
-const pageBefore = await readFile(getFixturePath('page-before.html'), 'utf-8');
-const imgSrc = await readFile(getFixturePath('files/nodejs.png'), 'utf-8');
-const scriptSrc = await readFile(getFixturePath('files/script.js'), 'utf-8');
-const cssSrc = await readFile(getFixturePath('files/app.css'), 'utf-8');
-const pageAfter = await readFile(getFixturePath('page-after.html'), 'utf-8');
 
 beforeAll(async () => {
   const nockUrl = 'https://ru.hexlet.io';
@@ -23,13 +18,13 @@ beforeAll(async () => {
   nock(nockUrl)
     .persist()
     .get('/courses')
-    .reply(200, pageBefore)
+    .replyWithFile(200, getFixturePath('page-before.html'))
     .get('/assets/professions/nodejs.png')
-    .reply(200, imgSrc)
+    .replyWithFile(200, getFixturePath('files/nodejs.png'))
     .get('/packs/js/runtime.js')
-    .reply(200, scriptSrc)
+    .replyWithFile(200, getFixturePath('files/script.js'))
     .get('/assets/application.css')
-    .reply(200, cssSrc)
+    .replyWithFile(200, getFixturePath('files/app.css'))
     .get('/wrong')
     .replyWithError('404 Not found');
 });
@@ -43,6 +38,7 @@ test('Checking page load with images', async () => {
   const url = 'https://ru.hexlet.io/courses';
   const receivedPath = await downloadPage(url, tempPath);
   const receivedResult = await readFile(receivedPath, 'utf-8');
+  const pageAfter = await readFile(getFixturePath('page-after.html'), 'utf-8');
   expect(pageAfter).toEqual(receivedResult);
 });
 
