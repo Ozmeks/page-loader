@@ -37,36 +37,60 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
   log(`File path: ${outputFilePath}`);
   const filesPath = resolve(outputPath, dirName);
 
+  const isLocal = (src) => {
+    const { host } = new URL(src, inputUrl);
+    return (host === inputHost);
+  };
+
   let $;
   const promises = [];
   const promise = axios.get(inputUrl)
     .then(({ data }) => {
       logHttp(`Received html by url: ${inputUrl}`);
+
       $ = load(data);
-
-      $('script, img, link').each((i, el) => {
-        const src = ($(el).prop('tagName') === 'LINK') ? $(el).attr('href') : $(el).attr('src');
-        if (typeof src !== 'undefined' && src !== false) {
-          const { href, pathname, host } = new URL(src, inputUrl);
-          const isLocal = (host === inputHost);
-          if (isLocal) {
-            const fileName = makeFileName(`${prefixFileName}${pathname}`);
-            const path = resolve(filesPath, fileName);
-            promises.push({ url: href, path });
-
-            const localLink = join(dirName, fileName);
-            log(`Created local link: ${localLink}`);
-            if ($(el).prop('tagName') === 'LINK') {
-              $(el).attr('href', localLink);
-            } else {
-              $(el).attr('src', localLink);
-            }
-          }
+      $('script, img, link').each((_i, el) => {
+        const isLink = $(el).prop('tagName') === 'LINK';
+        const src = isLink ? $(el).attr('href') : $(el).attr('src');
+        if (!(src && isLocal(src))) {
+          return;
         }
+
+        const { href, pathname } = new URL(src, inputUrl);
+        const fileName = makeFileName(`${prefixFileName}${pathname}`);
+        const localLink = join(dirName, fileName);
+
+        log(`Created local link: ${localLink}`);
+        if (isLink) {
+          $(el).attr('href', localLink);
+        } else {
+          $(el).attr('src', localLink);
+        }
+
+        const path = resolve(filesPath, fileName);
+        promises.push({ url: href, path });
       });
-      return (promises.length > 0) ? fsp.mkdir(filesPath) : null;
+
+      if (promises.length === 0) {
+        return null;
+      }
+
+      log(`Started to create dir for assets: ${filesPath}`);
+      return fsp.mkdir(filesPath);
     })
     .then(() => {
+      log('Prepared assets');
+      const outputHtml = format($.html(), { parser: 'html' });
+      const task = new Listr([
+        {
+          title: `Download html page ${inputUrl}`,
+          task: () => fsp.writeFile(outputFilePath, outputHtml),
+        },
+      ]);
+      return task.run();
+    })
+    .then(() => {
+      logHttp(`Downloaded html to ${outputFilePath}`);
       const sourceCount = promises.length;
       if (sourceCount === 0) {
         return null;
@@ -97,18 +121,7 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
         .run();
     })
     .then(() => {
-      logHttp('Finished downloading html sources');
-      const outputHtml = format($.html(), { parser: 'html' });
-      const task = new Listr([
-        {
-          title: `Saved html page ${inputUrl}`,
-          task: () => fsp.writeFile(outputFilePath, outputHtml),
-        },
-      ]);
-      return task.run();
-    })
-    .then(() => {
-      log(`Saved html to ${outputFilePath}`);
+      logHttp(`Finished downloading html sources to ${outputFilePath}`);
       return outputFilePath;
     });
 
