@@ -12,7 +12,7 @@ program
   .action((url) => {
     const { output } = program.opts();
     downloadPage(url, output)
-      .then((output) => console.log(`Page was successfully downloaded into '${output}'`))
+      .then((outputDir) => console.log(`Page was successfully downloaded into '${outputDir}'`))
       .catch((e) => {
         console.error(e.message);
         process.exit(1);

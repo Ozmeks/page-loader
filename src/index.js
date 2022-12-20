@@ -29,11 +29,11 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
   const { host: inputHost, pathname: inputPathName } = new URL(inputUrl);
   const inputPathNameSlash = (inputPathName === '/') ? '' : inputPathName;
   const mainName = join(inputHost, inputPathNameSlash);
-  
+
   const pageNameWithoutExt = makeFileName(mainName);
   const { ext } = parse(pageNameWithoutExt);
-  const pageName = (ext === '.html') ? pageNameWithoutExt : `${pageNameWithoutExt}.html`
-  
+  const pageName = (ext === '.html') ? pageNameWithoutExt : `${pageNameWithoutExt}.html`;
+
   const prefixFileName = makeName(inputHost);
   const dirName = `${makeName(mainName)}_files`;
 
