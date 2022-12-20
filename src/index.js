@@ -21,7 +21,7 @@ const log = debug('page-loader');
 const logHttp = debug('page-loader: http');
 
 const downloadPage = (inputUrl, inputPath = 'default') => {
-  log('start logging');
+  log('Logging started');
 
   const outputPath = (inputPath === 'default') ? process.cwd() : inputPath;
   log(`Output path: ${outputPath}`);
@@ -29,7 +29,11 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
   const { host: inputHost, pathname: inputPathName } = new URL(inputUrl);
   const inputPathNameSlash = (inputPathName === '/') ? '' : inputPathName;
   const mainName = join(inputHost, inputPathNameSlash);
-  const pageName = makeFileName(mainName);
+  
+  const pageNameWithoutExt = makeFileName(mainName);
+  const { ext } = parse(pageNameWithoutExt);
+  const pageName = (ext === '.html') ? pageNameWithoutExt : `${pageNameWithoutExt}.html`
+  
   const prefixFileName = makeName(inputHost);
   const dirName = `${makeName(mainName)}_files`;
 
@@ -121,7 +125,8 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
         .run();
     })
     .then(() => {
-      logHttp(`Finished downloading html sources to ${outputFilePath}`);
+      logHttp(`Page was successfully downloaded into '${outputFilePath}'`);
+      log('Logging successfully ended');
       return outputFilePath;
     });
 

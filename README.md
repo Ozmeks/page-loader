@@ -1,5 +1,4 @@
-### Hexlet tests and linter status:
-[![Actions Status](https://github.com/Ozmeks/backend-project-lvl3/workflows/hexlet-check/badge.svg)](https://github.com/Ozmeks/backend-project-lvl3/actions)
+### Tests and linter status:
 [![Linter and tests](https://github.com/Ozmeks/backend-project-lvl3/actions/workflows/node-check.yml/badge.svg)](https://github.com/Ozmeks/backend-project-lvl3/actions/workflows/node-check.yml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/c20ce0b3299232e264b6/maintainability)](https://codeclimate.com/github/Ozmeks/backend-project-lvl3/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c20ce0b3299232e264b6/test_coverage)](https://codeclimate.com/github/Ozmeks/backend-project-lvl3/test_coverage)
@@ -37,10 +36,7 @@ pageLoader(url, filePath);
 ```
 
 #### Page loading example:
-[![asciicast](https://asciinema.org/a/530213.svg)](https://asciinema.org/a/530213)
+[![asciicast](https://asciinema.org/a/547016.svg)](https://asciinema.org/a/547016)
 
 #### Debug mode example:
-[![asciicast](https://asciinema.org/a/530217.svg)](https://asciinema.org/a/530217)
-
-#### Exmple with wrong arguments:
-[![asciicast](https://asciinema.org/a/526890.svg)](https://asciinema.org/a/526890)
+[![asciicast](https://asciinema.org/a/547024.svg)](https://asciinema.org/a/547024)
