@@ -39,4 +39,4 @@ pageLoader(url, filePath);
 [![asciicast](https://asciinema.org/a/547016.svg)](https://asciinema.org/a/547016)
 
 #### Debug mode example:
-[![asciicast](https://asciinema.org/a/547024.svg)](https://asciinema.org/a/547024)
+[![asciicast](https://asciinema.org/a/547115.svg)](https://asciinema.org/a/547115)

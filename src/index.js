@@ -30,15 +30,15 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
   const inputPathNameSlash = (inputPathName === '/') ? '' : inputPathName;
   const mainName = join(inputHost, inputPathNameSlash);
 
+  // Page path
   const pageNameWithoutExt = makeFileName(mainName);
   const { ext } = parse(pageNameWithoutExt);
   const pageName = (ext === '.html') ? pageNameWithoutExt : `${pageNameWithoutExt}.html`;
-
+  const outputHtmlPath = resolve(outputPath, pageName);
+  log(`HTML path: ${outputHtmlPath}`);
+  // File path
   const prefixFileName = makeName(inputHost);
   const dirName = `${makeName(mainName)}_files`;
-
-  const outputFilePath = resolve(outputPath, pageName);
-  log(`File path: ${outputFilePath}`);
   const filesPath = resolve(outputPath, dirName);
 
   const isLocal = (src) => {
@@ -88,13 +88,13 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
       const task = new Listr([
         {
           title: `Download html page ${inputUrl}`,
-          task: () => fsp.writeFile(outputFilePath, outputHtml),
+          task: () => fsp.writeFile(outputHtmlPath, outputHtml),
         },
       ]);
       return task.run();
     })
     .then(() => {
-      logHttp(`Downloaded html to ${outputFilePath}`);
+      logHttp(`Downloaded html to ${outputHtmlPath}`);
       const sourceCount = promises.length;
       if (sourceCount === 0) {
         return null;
@@ -125,9 +125,8 @@ const downloadPage = (inputUrl, inputPath = 'default') => {
         .run();
     })
     .then(() => {
-      logHttp(`Page was successfully downloaded into '${outputFilePath}'`);
-      log('Logging successfully ended');
-      return outputFilePath;
+      logHttp(`Page was successfully downloaded into '${outputHtmlPath}'`);
+      return outputHtmlPath;
     });
 
   return promise;
